@@ -128,3 +128,23 @@ void printHuffmanData(huffmanData data[], int size) {
         printf("Character: %c, Frequency: %d\n", data[i].c, data[i].freq);
     }
 }
+void printTreeHelper(MinHeapNode* root, int depth) {
+    if (root == NULL) {
+        return;
+    }
+
+    // Indentar según la profundidad del nodo en el árbol
+    for (int i = 0; i < depth; i++) {
+        printf("  ");
+    }
+
+    // Imprimir el carácter y la frecuencia del nodo actual
+    printf("%c (%d)\n", root->data.c, root->data.freq);
+
+    // Llamada recursiva para imprimir el subárbol izquierdo y derecho
+    printTreeHelper(root->left, depth + 1);
+    printTreeHelper(root->right, depth + 1);
+}
+void printHuffmanTree(MinHeapNode* root) {
+    printTreeHelper(root, 0);
+}

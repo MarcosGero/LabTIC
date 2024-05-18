@@ -24,6 +24,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/huffmanops.h" beforeDir="false" afterPath="$PROJECT_DIR$/huffmanops.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lab2tic.c" beforeDir="false" afterPath="$PROJECT_DIR$/lab2tic.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utilidades.h" beforeDir="false" afterPath="$PROJECT_DIR$/utilidades.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,11 +69,6 @@
   }
 }</component>
   <component name="RunManager">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="LabTIC" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="LabTIC" TARGET_NAME="LabTIC" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="LabTIC" RUN_TARGET_NAME="LabTIC">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -90,7 +86,8 @@
       <workItem from="1715827139228" duration="3390000" />
       <workItem from="1715916039843" duration="359000" />
       <workItem from="1715916411846" duration="11000" />
-      <workItem from="1716052644180" duration="6021000" />
+      <workItem from="1716052644180" duration="8691000" />
+      <workItem from="1716064873743" duration="2171000" />
     </task>
     <servers />
   </component>

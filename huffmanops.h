@@ -119,7 +119,7 @@ int max (huffmanData arr[], int strt, int end)
 /* Recursive function to construct binary of size len from
    Inorder traversal inorder[]. Initial values of start and end
    should be 0 and len -1.  */
-MinHeapNode* buildTree (huffmanData inorder[], int start, int end)
+MinHeapNode* buildTreeFromInorder (huffmanData inorder[], int start, int end)
 {
     if (start > end)
         return NULL;
@@ -139,8 +139,8 @@ MinHeapNode* buildTree (huffmanData inorder[], int start, int end)
     /* Using index in Inorder traversal, construct left and
        right subtress */
 
-    root->left  = buildTree (inorder, start, i-1);
-    root->right = buildTree (inorder, i+1, end);
+    root->left  = buildTreeFromInorder (inorder, start, i-1);
+    root->right = buildTreeFromInorder (inorder, i+1, end);
     return root;
 }
 
