@@ -22,7 +22,6 @@
   <component name="ChangeListManager">
     <list default="true" id="f6a47f37-c2b9-494c-8bf9-1fcf0c99aa5e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/huffmanops.h" beforeDir="false" afterPath="$PROJECT_DIR$/huffmanops.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lab2tic.c" beforeDir="false" afterPath="$PROJECT_DIR$/lab2tic.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utilidades.h" beforeDir="false" afterPath="$PROJECT_DIR$/utilidades.h" afterDir="false" />
     </list>
@@ -74,6 +73,11 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -87,7 +91,7 @@
       <workItem from="1715916039843" duration="359000" />
       <workItem from="1715916411846" duration="11000" />
       <workItem from="1716052644180" duration="8691000" />
-      <workItem from="1716064873743" duration="2171000" />
+      <workItem from="1716064873743" duration="5066000" />
     </task>
     <servers />
   </component>

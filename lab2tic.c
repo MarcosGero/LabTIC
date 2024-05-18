@@ -6,42 +6,34 @@
 #include "utilidades.h"
 #include "huffmanops.h"
 #define MAX_FILENAME 256
-char* decompress_binary(char* data, size_t size, MinHeapNode* root) {
+char* decompress_binary(char* data, size_t size, int validBitsInLastByte, MinHeapNode* root) {
     MinHeapNode* search = root;
-    printf("La data es:\n");
-    printf(data);
-    printf("\n");
+    int bitIndex = 0;
     int charIndex = 0;
-    char* msj = (char*)malloc(size * 8); // por cada bit puede haber a lo sumo un caracter
-    memset(msj, 0, size * 8);
-    printf("Recorriendo el arbol:\n");
-    for (int i = 0; i < size; i++) {
-        char bit = data[i];
+    size_t maxOutputSize = size * 8; // Estimación del tamaño máximo del mensaje descomprimido
+    char* msj = (char*)malloc(maxOutputSize + 1); // Alocar memoria suficiente para el mensaje original más el terminador nulo
+    memset(msj, 0, maxOutputSize + 1);
+
+    while (bitIndex < (size - 1) * 8 + validBitsInLastByte) {
+        int bit = get_bit(data, bitIndex);
+        bitIndex++;
 
         // Recorrer el árbol
-        if (bit == '1') {
+        if (bit) {
             search = search->right;
-        } else if (bit == '0') {
-            search = search->left;
         } else {
-            fprintf(stderr, "Error: bit no válido encontrado en la entrada\n");
-            free(msj);
-            return NULL;
+            search = search->left;
         }
-        // Si tras movernos en el árbol damos con un nodo que es hoja, entonces este contiene el caracter equivalente a convertir
+
+        // Si llegamos a una hoja, hemos encontrado un carácter
         if (isLeaf(search)) {
             msj[charIndex] = search->data.c;
             search = root;
             charIndex++;
         }
-
-        // Si hemos decodificado tantos caracteres como tamaño de entrada, romper el bucle
-        if (charIndex >= size) {
-            break;
-        }
     }
 
-    // Asegurarse de que el mensaje decodificado sea nulo terminado
+    // Asegurarse de que el mensaje descomprimido sea nulo terminado
     msj[charIndex] = '\0';
     return msj;
 }
@@ -104,13 +96,20 @@ int comprimir_huffman(char* input_filename,char* output_filename){
 
     fwrite(&tamano, sizeof(int), 1, out);
     fwrite(inorder,sizeof(huffmanData),tamano,out); // escribe el array en un archivo
-    char* decompressedMessage = decompress_binary(compressedMsj, strlen(compressedMsj), huffmanTreeRoot);
-    printf("Mensaje: \n");
-    printf(decompressedMessage);
-    fwrite(compressedMsj, sizeof(char), strlen(compressedMsj), out);
+
+    // Convertir el mensaje comprimido de bits '0' y '1' a bytes reales
+    char* binaryData;
+    size_t binarySize;
+    int validBitsInLastByte;
+    convertToBinary(compressedMsj, &binaryData, &binarySize, &validBitsInLastByte);
+
+    // Escribir la cantidad de bits válidos en el último byte del archivo
+    fwrite(&validBitsInLastByte, sizeof(int), 1, out);
+    fwrite(binaryData, sizeof(char), binarySize, out);
 
 
     // Liberar memoria y cerrar archivos
+    free(binaryData);
     freeHuffmanTree(huffmanTreeRoot);
     free(data);
     free(compressedMsj);
@@ -151,11 +150,13 @@ int descomprimir_huffman(char* input_filename, char* output_filename) {
 
     printf("Se armo el arbol de huffman\n");
     printHuffmanTree(huffmanTreeRoot);
-    
+    int validBitsInLastByte;
+    fread(&validBitsInLastByte, sizeof(int), 1, in);
+
     // Leer el mensaje comprimido
     fseek(in, 0, SEEK_END);
-    size_t fileSize = ftell(in) - sizeof(int) - (tamano * sizeof(huffmanData));
-    fseek(in, sizeof(int) + (tamano * sizeof(huffmanData)), SEEK_SET);
+    size_t fileSize = ftell(in) - sizeof(int) - (tamano * sizeof(huffmanData)) - sizeof(int);
+    fseek(in, sizeof(int) + (tamano * sizeof(huffmanData)) + sizeof(int), SEEK_SET);
 
     char* compressedData = (char*)malloc(fileSize + 1);
     if (!compressedData) {
@@ -170,7 +171,8 @@ int descomprimir_huffman(char* input_filename, char* output_filename) {
     compressedData[fileSize] = '\0';
 
     // Descomprimir el mensaje
-    char* decompressedMessage = decompress_binary(compressedData, fileSize, huffmanTreeRoot);
+    char* decompressedMessage = decompress_binary(compressedData, fileSize, validBitsInLastByte, huffmanTreeRoot);
+
 
     // Escribir el mensaje descomprimido en el archivo de salida
     FILE* out = fopen(output_filename, "wb");

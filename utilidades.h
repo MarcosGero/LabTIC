@@ -148,3 +148,21 @@ void printTreeHelper(MinHeapNode* root, int depth) {
 void printHuffmanTree(MinHeapNode* root) {
     printTreeHelper(root, 0);
 }
+// Función para convertir la cadena de '0' y '1' a bytes reales
+void convertToBinary(char* bits, char** binaryData, size_t* binarySize, int* validBitsInLastByte) {
+    size_t len = strlen(bits);
+    *binarySize = (len + 7) / 8; // Número de bytes necesarios
+    *binaryData = (char*)malloc(*binarySize);
+    memset(*binaryData, 0, *binarySize);
+
+    for (size_t i = 0; i < len; i++) {
+        if (bits[i] == '1') {
+            (*binaryData)[i / 8] |= (1 << (7 - (i % 8)));
+        }
+    }
+
+    *validBitsInLastByte = len % 8;
+    if (*validBitsInLastByte == 0) {
+        *validBitsInLastByte = 8; // Si no hay padding, todos los bits en el último byte son válidos
+    }
+}
