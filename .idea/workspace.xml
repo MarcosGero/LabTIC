@@ -24,7 +24,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/huffmanops.h" beforeDir="false" afterPath="$PROJECT_DIR$/huffmanops.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lab2tic.c" beforeDir="false" afterPath="$PROJECT_DIR$/lab2tic.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utilidades.h" beforeDir="false" afterPath="$PROJECT_DIR$/utilidades.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +90,7 @@
       <workItem from="1715827139228" duration="3390000" />
       <workItem from="1715916039843" duration="359000" />
       <workItem from="1715916411846" duration="11000" />
-      <workItem from="1716052644180" duration="4453000" />
+      <workItem from="1716052644180" duration="6021000" />
     </task>
     <servers />
   </component>

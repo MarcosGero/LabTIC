@@ -47,17 +47,12 @@ int comprimir_huffman(char* input_filename,char* output_filename){
         return 2;
     }
 
-    // Mostrar dato sin codificar
-//    printBlock(data,size);
 
     // Calcular tabla de frecuencias (usamos arreglos de 128 porque es la cantidad maxima de caracteres representables por ascii)
     char c[128];
     int freq[128];
     int tam = calculateFrequencyTable(data,&c,&freq);
 
-//    for(int i = 0; i < tam; i++){
-//        printf("%c,%d\n",c[i],freq[i]);
-//    }
 
     MinHeapNode* huffmanTreeRoot = HuffmanCodes(c,freq,tam);
 
@@ -79,10 +74,7 @@ int comprimir_huffman(char* input_filename,char* output_filename){
     memset(compressedMsj,0,size*MAX_TREE_HT);
 
     for(int i = 0; i < size; i++){
-
         strcat(compressedMsj,compressionTable[data[i]]);
-//        printf("%c: ",data[i]);
-//        printf("%s\n",compressionTable[data[i]]);
     }
 
     printf("Mensaje comprimido: %s\n",compressedMsj);
@@ -97,10 +89,9 @@ int comprimir_huffman(char* input_filename,char* output_filename){
         printf("%c,%d\n",inorder[i].c,inorder[i].freq);
     }
 
-    // test
-    MinHeapNode* newRoot = buildTree(inorder,0,tamano);
-
+    fwrite(&tamano, sizeof(int), 1, out);
     fwrite(inorder,sizeof(huffmanData),tamano,out); // escribe el array en un archivo
+    fwrite(compressedMsj, sizeof(char), strlen(compressedMsj), out);
 
 
     // Liberar memoria y cerrar archivos

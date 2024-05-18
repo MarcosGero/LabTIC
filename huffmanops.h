@@ -1,9 +1,5 @@
-
-
 #ifndef HUFFMANOPS_H
 #define HUFFMANOPS_H
-#include "minheap.h"
-
 
 // Calcula las frecuencias de los caracteres, y retorna dos arreglos: uno con los caracteres, y otro con sus respectivas frecuencias.
 // Ademas, retorna el tama�o de esos arreglos
