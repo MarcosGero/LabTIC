@@ -8,7 +8,7 @@
 #define MAX_FILENAME 256
 
 // Calcula las frecuencias de los caracteres, y retorna dos arreglos: uno con los caracteres, y otro con sus respectivas frecuencias.
-// Ademas, retorna el tamaño de esos arreglos
+// Ademas, retorna el tama?o de esos arreglos
 int calculateFrequencyTable(char* texto, char* letras, int* frecuencias){
     int size = strlen(texto);
     int freqTmp[128];
@@ -77,6 +77,36 @@ MinHeapNode* buildHuffmanTree(char data[], int freq[], int size){
     return extractMin(minHeap);
 }
 
+// Prints huffman codes from the root of Huffman Tree.
+// It uses arr[] to store codes
+void printCodes(MinHeapNode* root, int arr[],int top){
+
+    // Nota: el recorrido es post-order
+
+    // Assign 0 to left edge and recur
+    if (root->left) {
+
+        arr[top] = 0;
+        printCodes(root->left, arr, top + 1);
+    }
+
+    // Assign 1 to right edge and recur
+    if (root->right) {
+
+        arr[top] = 1;
+        printCodes(root->right, arr, top + 1);
+    }
+
+    // If this is a leaf node, then
+    // it contains one of the input
+    // characters, print the character
+    // and its code from arr[]
+    if (isLeaf(root)) {
+        printf("%c: ", root->data);
+        printArr(arr, top); // Aqui esta almacenado el codigo
+    }
+}
+
 
 // Funcion auxiliar para liberar el arbol creado por el algoritmo de huffman
 void freeHuffmanTree(MinHeapNode* root){
@@ -102,6 +132,26 @@ MinHeapNode* HuffmanCodes(char data[], int freq[], int size){
 
     return root;
 }
+
+/* UTILITY FUNCTIONS */
+/* Function to find index of the maximum value in arr[start...end] */
+
+int max (huffmanData arr[], int strt, int end)
+{
+    int i, max = arr[strt].freq, maxind = strt;
+
+    for(i = strt+1; i <= end; i++)
+    {
+        if(arr[i].freq > max)
+        {
+            max = arr[i].freq;
+            maxind = i;
+        }
+    }
+
+    return maxind;
+}
+
 
 /* Recursive function to construct binary of size len from
    Inorder traversal inorder[]. Initial values of start and end
@@ -168,17 +218,11 @@ void createHuffmanTable(MinHeapNode* root,char arr[],int top,char* table){
         strncpy(table+root->data.c*MAX_TREE_HT,arr,top);
     }
 }
-int comprimir_huffman(char* input_filename, char* output_filename) {
-    printf("Iniciando compresión de Huffman\n");
 
+int comprimir_huffman(char* input_filename,char* output_filename){
     size_t size;
     char *data = load_file(input_filename, &size); // Carga los datos a codificar
-    if (!data) {
-        fprintf(stderr, "Error al cargar el archivo de entrada\n");
-        return 1;
-    }
-
-    printf("Archivo de entrada cargado exitosamente\n");
+    if (!data) return 1;
 
     FILE *out = fopen(output_filename, "wb");
     if (!out) {
@@ -187,103 +231,69 @@ int comprimir_huffman(char* input_filename, char* output_filename) {
         return 2;
     }
 
-    printf("Archivo de salida creado exitosamente\n");
+    // Mostrar dato sin codificar
+//    printBlock(data,size);
 
-    // Calcular tabla de frecuencias
-    char c[128] = {0};
-    int freq[128] = {0};
-    int tam = calculateFrequencyTable(data, &c, &freq);
+    // Calcular tabla de frecuencias (usamos arreglos de 128 porque es la cantidad maxima de caracteres representables por ascii)
+    char c[128];
+    int freq[128];
+    int tam = calculateFrequencyTable(data,&c,&freq);
 
-    printf("Tabla de frecuencias calculada\n");
+//    for(int i = 0; i < tam; i++){
+//        printf("%c,%d\n",c[i],freq[i]);
+//    }
 
-    MinHeapNode* huffmanTreeRoot = HuffmanCodes(c, freq, tam);
-
-    printf("Árbol de Huffman construido\n");
+    MinHeapNode* huffmanTreeRoot = HuffmanCodes(c,freq,tam);
 
     char compressionTable[128][MAX_TREE_HT];
-    memset(compressionTable, 0, sizeof(char) * 128 * MAX_TREE_HT);
-    char arr[MAX_TREE_HT];
+    memset(&compressionTable,0,sizeof(char)*128*MAX_TREE_HT);
+    char arr[MAX_TREE_HT]; // Armar peque?o acumulador para los codigos obtenidos en el barrido del arbol de huffman
     int top = 0;
 
-    createHuffmanTable(huffmanTreeRoot, arr, top, &compressionTable);
+    createHuffmanTable(huffmanTreeRoot,arr,top,&compressionTable);
 
-    printf("Tabla de compresión creada\n");
-
-    // Reservar espacio de más para el mensaje comprimido
-    size_t compressedSizeEstimate = size * MAX_TREE_HT;
-    char* compressedMsj = malloc(compressedSizeEstimate);
-    if (!compressedMsj) {
-        perror("Error al reservar memoria para el mensaje comprimido");
-        freeHuffmanTree(huffmanTreeRoot);
-        free(data);
-        fclose(out);
-        return 3;
-    }
-    memset(compressedMsj, 0, compressedSizeEstimate);
-
-    printf("Memoria reservada para el mensaje comprimido\n");
-
-    // Comprimir el mensaje
-    for (size_t i = 0; i < size; i++) {
-        strcat(compressedMsj, compressionTable[(unsigned char)data[i]]);
+    // Ver tabla de compresion
+    printf("\nTABLA COMPRESION: \n");
+    for(int i = 0; i < 128; i++){
+        printf("%c: %s\n",i,compressionTable[i]);
     }
 
-    printf("Mensaje comprimido: %s\n", compressedMsj);
+    // Reservar espacio de mas para el mensaje comprimido
+    char* compressedMsj = malloc(sizeof(char)*size*MAX_TREE_HT);
+    memset(compressedMsj,0,size*MAX_TREE_HT);
 
-    huffmanData inorder[128] = {0};
+    for(int i = 0; i < size; i++){
+
+        strcat(compressedMsj,compressionTable[data[i]]);
+//        printf("%c: ",data[i]);
+//        printf("%s\n",compressionTable[data[i]]);
+    }
+
+    printf("Mensaje comprimido: %s\n",compressedMsj);
+
+
+    huffmanData inorder[128];
     int tamano = 0;
-    createInorderTree(huffmanTreeRoot, &inorder, &tamano);
 
-    printf("Árbol de Huffman convertido a inorder\n");
+    createInorderTree(huffmanTreeRoot,&inorder,&tamano);
 
-    // Verificar que tamano sea correcto
-    if (tamano > 128) {
-        fprintf(stderr, "Error: el tamaño del árbol de Huffman es mayor a 128\n");
-        freeHuffmanTree(huffmanTreeRoot);
-        free(data);
-        free(compressedMsj);
-        fclose(out);
-        return 4;
+    for(int i = 0; i < tamano; i++){
+        printf("%c,%d\n",inorder[i].c,inorder[i].freq);
     }
 
-    // Escribir la tabla de frecuencias (array de structs huffmanData) en el archivo de salida
-    size_t written = fwrite(inorder, sizeof(huffmanData), 128, out);
-    if (written != 128) {
-        perror("Error al escribir la tabla de frecuencias");
-        freeHuffmanTree(huffmanTreeRoot);
-        free(data);
-        free(compressedMsj);
-        fclose(out);
-        return 5;
-    }
+    // test
+    MinHeapNode* newRoot = buildTree(inorder,0,tamano);
 
-    printf("Tabla de frecuencias escrita en el archivo\n");
+    fwrite(inorder,sizeof(huffmanData),tamano,out); // escribe el array en un archivo
 
-    // Escribir el mensaje comprimido en el archivo de salida
-    size_t compressedLength = strlen(compressedMsj);
-    written = fwrite(compressedMsj, sizeof(char), compressedLength, out);
-    if (written != compressedLength) {
-        perror("Error al escribir el mensaje comprimido");
-        freeHuffmanTree(huffmanTreeRoot);
-        free(data);
-        free(compressedMsj);
-        fclose(out);
-        return 6;
-    }
-
-    printf("Mensaje comprimido escrito en el archivo\n");
 
     // Liberar memoria y cerrar archivos
     freeHuffmanTree(huffmanTreeRoot);
     free(data);
     free(compressedMsj);
     fclose(out);
-    printf("Compresión completada exitosamente\n");
     return 0;
 }
-
-
-
 
 char* decompress_binary(char* input_filename,size_t size, MinHeapNode* root){
     MinHeapNode* search = root;
@@ -302,7 +312,7 @@ char* decompress_binary(char* input_filename,size_t size, MinHeapNode* root){
             search = search->left;
         }
 
-        // Si tras movernos en el arbol damos con un nodo que es hoja, entonces este contendrá el caracter equivalente a convertir
+        // Si tras movernos en el arbol damos con un nodo que es hoja, entonces este contendr? el caracter equivalente a convertir
         if(isLeaf(search)){
             msj[bitIndex] = search->data.c;
             search = root;
@@ -314,94 +324,86 @@ char* decompress_binary(char* input_filename,size_t size, MinHeapNode* root){
 }
 
 
-int descomprimir_huffman(char* input_filename, char* output_filename) {
-    printf("Inicio de descomprimir_huffman\n");
-
-    FILE *in = fopen(input_filename, "rb");
-    if (!in) {
-        perror("Error al abrir el archivo comprimido");
-        return 1;
-    }
-    printf("Archivo comprimido abierto: %s\n", input_filename);
+int descomprimir_huffman(char* input_filename,char* output_filename){
+    size_t size;
+    char *data = load_file(input_filename, &size); // Carga los datos a codificar
+    if (!data) return 1;
 
     FILE *out = fopen(output_filename, "wb");
     if (!out) {
-        perror("Error al crear el archivo descomprimido");
-        fclose(in);
+        perror("Error al crear el archivo decodificado");
+        free(data);
         return 2;
     }
-    printf("Archivo de salida creado: %s\n", output_filename);
 
-    // Leer los structs huffmanData desde el archivo
-    huffmanData inorder[128];
-    size_t read_size = fread(inorder, sizeof(huffmanData), 128, in);
-    if (read_size != 128) {
-        perror("Error al leer la tabla de frecuencias");
-        fclose(in);
-        fclose(out);
-        return 3;
+
+    // Mostrar dato sin codificar
+    printBlock(data,size);
+
+    // En esta parte se debe leer el arbol del archivo
+    char c[128];
+    int freq[128];
+    int tam = calculateFrequencyTable(data,&c,&freq);
+
+    for(int i = 0; i < tam; i++){
+        printf("%c,%d\n",c[i],freq[i]);
     }
-    printf("Tabla de frecuencias leída correctamente\n");
 
-    // Construir el árbol de Huffman a partir de los structs leídos
-    MinHeapNode* huffmanTreeRoot = buildTree(inorder, 0, 128);
-    printf("Árbol de Huffman construido\n");
 
-    // Obtener el tamaño del mensaje comprimido
-    fseek(in, 0, SEEK_END);
-    long compressedSize = ftell(in) - (128 * sizeof(huffmanData));
-    fseek(in, 128 * sizeof(huffmanData), SEEK_SET);
-    printf("Tamaño del mensaje comprimido: %ld\n", compressedSize);
 
-    // Leer el mensaje comprimido
-    char* compressedMsj = malloc(compressedSize);
-    if (!compressedMsj) {
-        perror("Error al asignar memoria para el mensaje comprimido");
-        fclose(in);
-        fclose(out);
-        return 4;
-    }
-    fread(compressedMsj, sizeof(char), compressedSize, in);
-    printf("Mensaje comprimido leído correctamente\n");
 
-    // Descompresión del mensaje
-    int bitIndex = 0;
-    MinHeapNode* currentNode = huffmanTreeRoot;
-    printf("Inicio de la descompresión del mensaje\n");
+    char table[128][MAX_TREE_HT];
 
-    for (long i = 0; i < compressedSize; i++) {
-        char byte = compressedMsj[i];
-        for (int j = 0; j < 8; j++) {
-            int bit = (byte >> (7 - j)) & 1; // Extraer cada bit del byte
-            if (bit) {
-                currentNode = currentNode->right;
-            } else {
-                currentNode = currentNode->left;
+
+    MinHeapNode* huffmanTreeRoot = HuffmanCodes(c,freq,tam); // Retorna la raiz del arbol de huffman, para poder guardarlo en el archivo
+
+
+    // Descompresion
+
+    // Escribir en el archivo de salida: el arbol de huffman (como array inorder de nodos, y mensaje comprimido)
+    int textLength = strlen(data);
+    int bitIndex = 0; // Va a recorrer todo el string a codificar, bit por bit
+    char batchedBits = 0; // Solo se puede escribir de a bytes en un archivo
+    int batchedBitsIndex = 0;
+
+    // Iterar sobre el mensaje a decodificar. Por cada caracter, recorreremos el arbol de huffman para obtener su codigo, y asi escribirlo en el archivo
+    for(int i = 0; i < textLength; i++){
+        MinHeapNode* root = huffmanTreeRoot; // Armar copia local de la raiz del arbol
+        while(!isLeaf(root)){ // Iterar hasta encontrarse con una hoja (o sea, un nodo con un caracter valido)
+
+            // Codificar en huffman usando el arbol de decision
+            int bit = get_bit(data,bitIndex);
+            printf("%d\n",bit);
+            int codedBit = 0;
+            if (bit){
+                root = root->right;
             }
-            if (!currentNode) {
-                perror("Error al navegar en el árbol de Huffman");
-                freeHuffmanTree(huffmanTreeRoot);
-                free(compressedMsj);
-                fclose(in);
-                fclose(out);
-                return 5;
+            else{
+                root = root->left;
             }
-            if (isLeaf(currentNode)) {
-                fputc(currentNode->data.c, out); // Escribir el carácter descomprimido en el archivo de salida
-                currentNode = huffmanTreeRoot; // Volver a la raíz para el siguiente carácter
+            bitIndex++;
+
+            set_bit(&batchedBits,batchedBitsIndex,bit);
+
+
+            // Armar grupo de bits para escribir
+            batchedBitsIndex = (batchedBitsIndex+1)%8;
+//            printf("batch: %d\n",batchedBitsIndex);
+
+
+            if (batchedBitsIndex%8==0){
+                printf("LOTE LISTO PARA ESCRIBIR: %c\n",batchedBits);
+//                fwrite(batchedBits,1,1,out);
+                fputc(batchedBits,out);
             }
         }
     }
-    printf("Descompresión del mensaje completada\n");
+
 
     // Liberar memoria y cerrar archivos
     freeHuffmanTree(huffmanTreeRoot);
-    free(compressedMsj);
-    fclose(in);
+    free(data);
     fclose(out);
-    printf("Memoria liberada y archivos cerrados\n");
-
-    printf("Fin de descomprimir_huffman\n");
     return 0;
 }
 
@@ -411,16 +413,17 @@ int main() {
     char input_filename_noExtension[MAX_FILENAME];
     char output_filename[MAX_FILENAME];
     int choice;
+    int block_size;
 
     printf("Programa para comprimir archivos usando Huffman\n");
 
     while (1) {
         printf("\n1. Cargar y mostrar archivo\n");
         printf("2. Comprimir archivo\n");
-        printf("3. Descomprimir archivo\n");
-        printf("4. Comparar tamaños\n");
+        printf("3. Descomprimir errores\n");
+        printf("4. Comparar tama?os\n");
         printf("0. Salir\n");
-        printf("Seleccione una opción: ");
+        printf("Seleccione una opci?n: ");
         scanf("%d", &choice);
 
         switch (choice) {
@@ -431,39 +434,26 @@ int main() {
                 char *content = load_file(input_filename, &size);
                 if (content) {
                     printf("Contenido del archivo:\n%s\n", content);
-                    printBlock(content, size);
+                    printBlock(content,size);
                     free(content);
                 }
                 break;
             case 2:
-                printf("Ingrese el nombre del archivo a comprimir: ");
-                scanf("%s", input_filename);
+                printf("Ingrese el nombre del archivo a comprimir: \n");
+//                scanf("%s", input_filename);
+                strcpy(input_filename,"xd.txt");
 
-                // Calcular lugar en donde poner el fin de string, para omitir la extensión al guardarlo
-                strcpy(input_filename_noExtension, input_filename);
-                input_filename_noExtension[strlen(input_filename) - 4] = '\0';
+                // Calcular lugar en donde poner el fin de string, para omitir la extension al guardarlo
+                strcpy(input_filename_noExtension,input_filename);
+                input_filename_noExtension[strlen(input_filename)-4]='\0';
 
                 sprintf(output_filename, "%s.huf", input_filename_noExtension);
 
-                if (comprimir_huffman(input_filename, output_filename) == 0)
-                    printf("Archivo comprimido creado como: %s\n", output_filename);
-                else
-                    printf("Error al comprimir el archivo.\n");
+                if(comprimir_huffman(input_filename, output_filename) == 0)
+                    printf("Archivo protegido creado como: %s\n", output_filename);
                 break;
             case 3:
-                printf("Ingrese el nombre del archivo a descomprimir: ");
-                scanf("%s", input_filename);
 
-                // Calcular lugar en donde poner el fin de string, para omitir la extensión al guardarlo
-                strcpy(input_filename_noExtension, input_filename);
-                input_filename_noExtension[strlen(input_filename) - 4] = '\0';
-
-                sprintf(output_filename, "%s_decoded.txt", input_filename_noExtension);
-
-                if (descomprimir_huffman(input_filename, output_filename) == 0)
-                    printf("Archivo descomprimido creado como: %s\n", output_filename);
-                else
-                    printf("Error al descomprimir el archivo.\n");
                 break;
             case 4:
 
@@ -471,7 +461,7 @@ int main() {
             case 0:
                 return 0;
             default:
-                printf("Opción inválida.\n");
+                printf("Opci?n inv?lida.\n");
         }
     }
 }

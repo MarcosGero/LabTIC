@@ -63,7 +63,7 @@ void printFileInBlocks(const char *input_filename, int blockSize) {
     free(buffer);
 }
 
-// Establece el bit en la posición 'pos' (0-indexado)
+// Establece el bit en la posici?n 'pos' (0-indexado)
 void set_bit(char *array, int pos, int value) {
     int byte_pos = pos / 8;
     int bit_pos = pos % 8;
@@ -73,7 +73,7 @@ void set_bit(char *array, int pos, int value) {
         array[byte_pos] &= ~(1 << 7-bit_pos);
 }
 
-// Obtén el bit en la posición 'pos' (0-indexado)
+// Obt?n el bit en la posici?n 'pos' (0-indexado)
 int get_bit(char *array, int pos) {
     int byte_pos = pos / 8;
     int bit_pos = pos % 8;
@@ -91,49 +91,4 @@ void sprintArr(int arr[], int n,int* buffer)
 
 
 //    sprintf(output_filename, "%s.huf", input_filename_noExtension);
-}
-// Prints huffman codes from the root of Huffman Tree.
-// It uses arr[] to store codes
-void printCodes(MinHeapNode* root, int arr[],int top){
-
-    // Nota: el recorrido es post-order
-
-    // Assign 0 to left edge and recur
-    if (root->left) {
-
-        arr[top] = 0;
-        printCodes(root->left, arr, top + 1);
-    }
-
-    // Assign 1 to right edge and recur
-    if (root->right) {
-
-        arr[top] = 1;
-        printCodes(root->right, arr, top + 1);
-    }
-
-    // If this is a leaf node, then
-    // it contains one of the input
-    // characters, print the character
-    // and its code from arr[]
-    if (isLeaf(root)) {
-        printf("%c: ", root->data);
-        printArr(arr, top); // Aqui esta almacenado el codigo
-    }
-}
-
-int max (huffmanData arr[], int strt, int end)
-{
-    int i, max = arr[strt].freq, maxind = strt;
-
-    for(i = strt+1; i <= end; i++)
-    {
-        if(arr[i].freq > max)
-        {
-            max = arr[i].freq;
-            maxind = i;
-        }
-    }
-
-    return maxind;
 }
