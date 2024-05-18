@@ -92,3 +92,39 @@ void sprintArr(int arr[], int n,int* buffer)
 
 //    sprintf(output_filename, "%s.huf", input_filename_noExtension);
 }
+
+// Prints huffman codes from the root of Huffman Tree.
+// It uses arr[] to store codes
+void printCodes(MinHeapNode* root, int arr[],int top){
+
+    // Nota: el recorrido es post-order
+
+    // Assign 0 to left edge and recur
+    if (root->left) {
+
+        arr[top] = 0;
+        printCodes(root->left, arr, top + 1);
+    }
+
+    // Assign 1 to right edge and recur
+    if (root->right) {
+
+        arr[top] = 1;
+        printCodes(root->right, arr, top + 1);
+    }
+
+    // If this is a leaf node, then
+    // it contains one of the input
+    // characters, print the character
+    // and its code from arr[]
+    if (isLeaf(root)) {
+        printf("%c: ", root->data);
+        printArr(arr, top); // Aqui esta almacenado el codigo
+    }
+}
+
+void printHuffmanData(huffmanData data[], int size) {
+    for (int i = 0; i < size; ++i) {
+        printf("Character: %c, Frequency: %d\n", data[i].c, data[i].freq);
+    }
+}

@@ -4,219 +4,35 @@
 #include <string.h>
 #include "minheap.h"
 #include "utilidades.h"
-
+#include "huffmanops.h"
 #define MAX_FILENAME 256
 
-// Calcula las frecuencias de los caracteres, y retorna dos arreglos: uno con los caracteres, y otro con sus respectivas frecuencias.
-// Ademas, retorna el tama?o de esos arreglos
-int calculateFrequencyTable(char* texto, char* letras, int* frecuencias){
-    int size = strlen(texto);
-    int freqTmp[128];
+char* decompress_binary(char* input_filename,size_t size, MinHeapNode* root){
+    MinHeapNode* search = root;
+    int bitIndex = 0;
+    char* msj = malloc(size*8); // por cada bit puede haber a lo sumo un caracter
+    memset(msj,0,size*8);
 
-    // Prepara los arreglos
-    memset(&freqTmp,0,128*sizeof(int));
-    memset(frecuencias,0,128*sizeof(int));
-    memset(letras,0,128);
-
-    printf("\ntext: %s; size: %d\n",texto,size);
-
-    // Escanea todo el archivo y va contando
-    for(int i = 0; i < size; i++){
-        freqTmp[texto[i]]++;
-    }
-
-    int nonZeroIndex = 0; // Indice para ir llenando los arreglos letras y frecuencias
-    // Muestra la tabla de las cantidades
-    for(int i = 0; i < 128; i++){
-        if (freqTmp[i] != 0){
-//            printf("%c: %d\n",i,freqTmp[i]);
-            frecuencias[nonZeroIndex] = freqTmp[i];
-            letras[nonZeroIndex] = i;
-            nonZeroIndex++;
+    for(int i = 0; i < size*8;i++){
+        int bit = get_bit(input_filename,i);
+        //printf("%d\n",bit);
+        // Recorre el arbol
+        if (bit){
+            search = search->right;
         }
-    }
-    return nonZeroIndex;
+        else{
+            search = search->left;
+        }
 
-}
-
-// The main function that builds Huffman tree
-MinHeapNode* buildHuffmanTree(char data[], int freq[], int size){
-    MinHeapNode *left, *right, *top;
-
-    // Step 1: Create a min heap of capacity
-    // equal to size. Initially, there are
-    // modes equal to size.
-    MinHeap* minHeap = createAndBuildMinHeap(data, freq, size);
-
-    // Iterate while size of heap doesn't become 1
-    while (!isSizeOne(minHeap)) {
-
-        // Step 2: Extract the two minimum
-        // freq items from min heap
-        left = extractMin(minHeap);
-        right = extractMin(minHeap);
-
-        // Step 3: Create a new internal
-        // node with frequency equal to the
-        // sum of the two nodes frequencies.
-        // Make the two extracted node as
-        // left and right children of this new node.
-        // Add this node to the min heap
-        // '$' is a special value for internal nodes, not
-        // used
-        top = newNode('$', left->data.freq + right->data.freq);
-
-        top->left = left;
-        top->right = right;
-
-        insertMinHeap(minHeap, top);
-    }
-
-    // Step 4: The remaining node is the
-    // root node and the tree is complete.
-    return extractMin(minHeap);
-}
-
-// Prints huffman codes from the root of Huffman Tree.
-// It uses arr[] to store codes
-void printCodes(MinHeapNode* root, int arr[],int top){
-
-    // Nota: el recorrido es post-order
-
-    // Assign 0 to left edge and recur
-    if (root->left) {
-
-        arr[top] = 0;
-        printCodes(root->left, arr, top + 1);
-    }
-
-    // Assign 1 to right edge and recur
-    if (root->right) {
-
-        arr[top] = 1;
-        printCodes(root->right, arr, top + 1);
-    }
-
-    // If this is a leaf node, then
-    // it contains one of the input
-    // characters, print the character
-    // and its code from arr[]
-    if (isLeaf(root)) {
-        printf("%c: ", root->data);
-        printArr(arr, top); // Aqui esta almacenado el codigo
-    }
-}
-
-
-// Funcion auxiliar para liberar el arbol creado por el algoritmo de huffman
-void freeHuffmanTree(MinHeapNode* root){
-    if (root == NULL) return;
-
-    freeHuffmanTree(root->left);
-    freeHuffmanTree(root->right);
-    free(root);
-}
-
-// The main function that builds a
-// Huffman Tree and print codes by traversing
-// the built Huffman Tree
-MinHeapNode* HuffmanCodes(char data[], int freq[], int size){
-    // Construct Huffman Tree
-    MinHeapNode* root = buildHuffmanTree(data, freq, size);
-
-    // Print Huffman codes using
-    // the Huffman tree built above
-    int arr[MAX_TREE_HT], top = 0;
-
-    printCodes(root, arr, top);
-
-    return root;
-}
-
-/* UTILITY FUNCTIONS */
-/* Function to find index of the maximum value in arr[start...end] */
-
-int max (huffmanData arr[], int strt, int end)
-{
-    int i, max = arr[strt].freq, maxind = strt;
-
-    for(i = strt+1; i <= end; i++)
-    {
-        if(arr[i].freq > max)
-        {
-            max = arr[i].freq;
-            maxind = i;
+        // Si tras movernos en el arbol damos con un nodo que es hoja, entonces este contendr? el caracter equivalente a convertir
+        if(isLeaf(search)){
+            msj[bitIndex] = search->data.c;
+            search = root;
+            bitIndex++;
         }
     }
 
-    return maxind;
-}
-
-
-/* Recursive function to construct binary of size len from
-   Inorder traversal inorder[]. Initial values of start and end
-   should be 0 and len -1.  */
-MinHeapNode* buildTree (huffmanData inorder[], int start, int end)
-{
-    if (start > end)
-        return NULL;
-
-    /* Find index of the maximum element from Binary Tree */
-    int i = max(inorder, start, end);
-
-    /* Pick the maximum value and make it root */
-    MinHeapNode *root = newNode(inorder[i].c,inorder[i].freq);
-
-    /* If this is the only element in inorder[start..end],
-
-       then return it */
-    if (start == end)
-        return root;
-
-    /* Using index in Inorder traversal, construct left and
-       right subtress */
-
-    root->left  = buildTree (inorder, start, i-1);
-    root->right = buildTree (inorder, i+1, end);
-    return root;
-}
-
-
-void createInorderTree(MinHeapNode* root, huffmanData* inorder,int* size){
-
-    // Caso base
-    if (root == NULL){
-        return;
-    }
-
-    // Recorrido recursivo inorder
-    createInorderTree(root->left,inorder,size);
-    inorder[*size] = root->data;
-    (*size)++;
-    createInorderTree(root->right,inorder,size);
-}
-
-
-void createHuffmanTable(MinHeapNode* root,char arr[],int top,char* table){
-    // Nota: el recorrido es post-order
-
-    // Assign 0 to left edge and recur
-    if (root->left) {
-        arr[top] = '0';
-        createHuffmanTable(root->left, arr, top + 1,table);
-    }
-
-    // Assign 1 to right edge and recur
-    if (root->right) {
-        arr[top] = '1';
-        createHuffmanTable(root->right, arr, top + 1,table);
-    }
-
-    if (isLeaf(root)) {
-//        printf("%c: %s\n",root->data.c,arr);
-        arr[top+1] = '\0'; // Para convertirlo en string
-        strncpy(table+root->data.c*MAX_TREE_HT,arr,top);
-    }
+    return msj;
 }
 
 int comprimir_huffman(char* input_filename,char* output_filename){
@@ -295,33 +111,7 @@ int comprimir_huffman(char* input_filename,char* output_filename){
     return 0;
 }
 
-char* decompress_binary(char* input_filename,size_t size, MinHeapNode* root){
-    MinHeapNode* search = root;
-    int bitIndex = 0;
-    char* msj = malloc(size*8); // por cada bit puede haber a lo sumo un caracter
-    memset(msj,0,size*8);
 
-    for(int i = 0; i < size*8;i++){
-        int bit = get_bit(input_filename,i);
-        //printf("%d\n",bit);
-        // Recorre el arbol
-        if (bit){
-            search = search->right;
-        }
-        else{
-            search = search->left;
-        }
-
-        // Si tras movernos en el arbol damos con un nodo que es hoja, entonces este contendr? el caracter equivalente a convertir
-        if(isLeaf(search)){
-            msj[bitIndex] = search->data.c;
-            search = root;
-            bitIndex++;
-        }
-    }
-
-    return msj;
-}
 
 
 int descomprimir_huffman(char* input_filename,char* output_filename){
@@ -443,7 +233,7 @@ int main() {
 //                scanf("%s", input_filename);
                 strcpy(input_filename,"xd.txt");
 
-                // Calcular lugar en donde poner el fin de string, para oasdmitir la extension al guasdsrdarlo
+                // Calcular lugar en donde poner el fin de string, para omitir la extension al guardarlo asds
                 strcpy(input_filename_noExtension,input_filename);
                 input_filename_noExtension[strlen(input_filename)-4]='\0';
 
