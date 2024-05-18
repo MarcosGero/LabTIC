@@ -443,7 +443,7 @@ int main() {
 //                scanf("%s", input_filename);
                 strcpy(input_filename,"xd.txt");
 
-                // Calcular lugar en donde poner el fin de string, para oasdmitir la extension al guardarlo
+                // Calcular lugar en donde poner el fin de string, para oasdmitir la extension al guasdsrdarlo
                 strcpy(input_filename_noExtension,input_filename);
                 input_filename_noExtension[strlen(input_filename)-4]='\0';
 
