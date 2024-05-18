@@ -315,11 +315,14 @@ char* decompress_binary(char* input_filename,size_t size, MinHeapNode* root){
 
 
 int descomprimir_huffman(char* input_filename, char* output_filename) {
+    printf("Inicio de descomprimir_huffman\n");
+
     FILE *in = fopen(input_filename, "rb");
     if (!in) {
         perror("Error al abrir el archivo comprimido");
         return 1;
     }
+    printf("Archivo comprimido abierto: %s\n", input_filename);
 
     FILE *out = fopen(output_filename, "wb");
     if (!out) {
@@ -327,6 +330,7 @@ int descomprimir_huffman(char* input_filename, char* output_filename) {
         fclose(in);
         return 2;
     }
+    printf("Archivo de salida creado: %s\n", output_filename);
 
     // Leer los structs huffmanData desde el archivo
     huffmanData inorder[128];
@@ -337,22 +341,33 @@ int descomprimir_huffman(char* input_filename, char* output_filename) {
         fclose(out);
         return 3;
     }
+    printf("Tabla de frecuencias leída correctamente\n");
 
     // Construir el árbol de Huffman a partir de los structs leídos
     MinHeapNode* huffmanTreeRoot = buildTree(inorder, 0, 128);
+    printf("Árbol de Huffman construido\n");
 
     // Obtener el tamaño del mensaje comprimido
     fseek(in, 0, SEEK_END);
     long compressedSize = ftell(in) - (128 * sizeof(huffmanData));
     fseek(in, 128 * sizeof(huffmanData), SEEK_SET);
+    printf("Tamaño del mensaje comprimido: %ld\n", compressedSize);
 
     // Leer el mensaje comprimido
     char* compressedMsj = malloc(compressedSize);
+    if (!compressedMsj) {
+        perror("Error al asignar memoria para el mensaje comprimido");
+        fclose(in);
+        fclose(out);
+        return 4;
+    }
     fread(compressedMsj, sizeof(char), compressedSize, in);
+    printf("Mensaje comprimido leído correctamente\n");
 
     // Descompresión del mensaje
     int bitIndex = 0;
     MinHeapNode* currentNode = huffmanTreeRoot;
+    printf("Inicio de la descompresión del mensaje\n");
 
     for (long i = 0; i < compressedSize; i++) {
         char byte = compressedMsj[i];
@@ -363,18 +378,30 @@ int descomprimir_huffman(char* input_filename, char* output_filename) {
             } else {
                 currentNode = currentNode->left;
             }
+            if (!currentNode) {
+                perror("Error al navegar en el árbol de Huffman");
+                freeHuffmanTree(huffmanTreeRoot);
+                free(compressedMsj);
+                fclose(in);
+                fclose(out);
+                return 5;
+            }
             if (isLeaf(currentNode)) {
                 fputc(currentNode->data.c, out); // Escribir el carácter descomprimido en el archivo de salida
                 currentNode = huffmanTreeRoot; // Volver a la raíz para el siguiente carácter
             }
         }
     }
+    printf("Descompresión del mensaje completada\n");
 
     // Liberar memoria y cerrar archivos
     freeHuffmanTree(huffmanTreeRoot);
     free(compressedMsj);
     fclose(in);
     fclose(out);
+    printf("Memoria liberada y archivos cerrados\n");
+
+    printf("Fin de descomprimir_huffman\n");
     return 0;
 }
 
