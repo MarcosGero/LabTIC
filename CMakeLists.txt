@@ -5,4 +5,5 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(LabTIC
         lab2tic.c
-        huffmanops.h)
+        huffmanops.h
+        huffman.h)

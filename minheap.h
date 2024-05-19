@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 
 #define MAX_TREE_HT 100
 

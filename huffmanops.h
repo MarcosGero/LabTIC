@@ -99,7 +99,7 @@ MinHeapNode* HuffmanCodes(char data[], int freq[], int size){
 /* UTILITY FUNCTIONS */
 /* Function to find index of the maximum value in arr[start...end] */
 
-int max (huffmanData arr[], int strt, int end)
+int maximo (huffmanData arr[], int strt, int end)
 {
     int i, max = arr[strt].freq, maxind = strt;
 
@@ -125,7 +125,7 @@ MinHeapNode* buildTreeFromInorder (huffmanData inorder[], int start, int end)
         return NULL;
 
     /* Find index of the maximum element from Binary Tree */
-    int i = max(inorder, start, end);
+    int i = maximo(inorder, start, end);
 
     /* Pick the maximum value and make it root */
     MinHeapNode *root = newNode(inorder[i].c,inorder[i].freq);
